@@ -1,0 +1,36 @@
+import {db} from "../Globals";
+import { DataModelType } from '../Enum';
+
+export class BaseDataModel {
+    myType: DataModelType = DataModelType.None;
+    constructor(
+        public id: string,
+        public name: string,
+        public data: any
+    ) {
+        
+    }
+
+    public async save() {
+        await db.put(this.myType + this.id.toString(), this.data);
+    }
+
+    public async delete() {
+        await db.del(this.myType + this.id.toString());
+    }
+
+    public static async load<T extends BaseDataModel>(id: string, type: (new (id:string,name:string,data) => T)) : Promise<T> {
+        var obj = new type(id, "No Name", {});
+        let data;
+        try {
+            data = await db.get(obj.myType.toString() + id.toString());
+            if(typeof data === "string")
+                data={};
+        } catch (err) {
+            data = {};
+        }
+        obj.data = data;
+        
+        return obj as T;
+    }
+} 
