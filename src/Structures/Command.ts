@@ -11,7 +11,6 @@ export class Command implements ICommand {
     this.messagecontent = "";
     this.always = false;
     this.triggerwords = [];
-    this.triggerfunc = async (msg:Message) => { return false; }
     this.typeofcmd = TypeOfCmd.Other;
     this.isHalting = false;
     this.canHalt = false;

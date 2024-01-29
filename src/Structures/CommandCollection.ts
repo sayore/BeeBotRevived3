@@ -1,4 +1,3 @@
-import { HugCommand } from "../Commands/ReactionCommands";
 import { Command, ICommand } from "./Command";
 
 // Collection of Commands to be used by the bot

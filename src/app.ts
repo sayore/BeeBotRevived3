@@ -4,12 +4,15 @@ import level from 'level-ts';
 import { LogLevel, Logging } from 'supernode/Base/Logging';
 import { BaseDataModel, ChannelData, Load, UserData } from './DataModels/mod';
 import { Command, CommandCollection, CommandHandler } from './Structures/mod';
-import { HugCommand } from './Commands/mod';
+import { ReactionCommand } from './Commands/mod';
+import { getClient, setClient } from "./Globals";
 
 import { Client, GatewayIntentBits , Message, REST, Routes } from 'discord.js';
 import { DataModelType } from './Enum';
 
-import {db} from "./Globals";
+import {db,prefix} from "./Globals";
+
+
 
 if(hasRun) process.exit(0);
 var hasRun = true;
@@ -40,14 +43,14 @@ let cmd = async () => {
 
 cmd().then(async () => {
   // Create a new Discord client with necessary intents
-  const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
+  setClient(new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] }));
+  let client = getClient();
   //const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
   // Your bot token. Replace 'YOUR_BOT_TOKEN' with your actual bot token
   const token = process.env.TOKEN;
 
   // The prefix for your bot's commands
-  const prefix = '!';
 
   // Ready event - When the bot is ready and logged in
   client.once('ready', () => {
@@ -59,12 +62,13 @@ cmd().then(async () => {
     // Ignore messages from bots
     if (message.author?.bot) return;
 
+    const [command, ...args] = message.content.slice(prefix.length).trim().split(/ +/);
+    Logging.log( `Message: ${message.content}`,"INFO");
+    Logging.log( `Command: ${command}, Args: ${args}`,"INFO");
     // Check if the message starts with the prefix
     if (message.content.startsWith(prefix)) {
       // Extract the command and arguments from the message 
-      const [command, ...args] = message.content.slice(prefix.length).trim().split(/ +/);
 
-      Logging.log( `Command: ${command}, Args: ${args}`,"INFO");
 
       
 
@@ -80,7 +84,7 @@ cmd().then(async () => {
     }
 
     let commandCollection : CommandCollection = new CommandCollection();
-    commandCollection.add(new HugCommand());
+    commandCollection.add(new ReactionCommand());
     
     // Use CommandHandler to check if the command should be executed
     CommandHandler.handle(commandCollection, message);
@@ -95,4 +99,5 @@ cmd().then(async () => {
 
   // Log in to Discord with your bot token
   client.login(process.env.TOKEN);
+  
 }).catch(console.error);

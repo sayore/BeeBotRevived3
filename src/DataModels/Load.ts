@@ -1,9 +1,5 @@
 import { Message } from "discord.js";
-import { BaseDataModel } from "./BaseDataModel";
-import { ChannelData } from "./ChannelData";
-import { GuildData } from "./GuildData";
-import { UserData } from "./UserData";
-import { RoleData } from "./RoleData";
+import { BaseDataModel, ChannelData, ReactionData, RoleData, UserData, GuildData } from "./mod";
 
 export class AllData {
   user:UserData;
@@ -33,6 +29,9 @@ export class Load {
   }
   static async UserData(id:string) : Promise<UserData> {
     return BaseDataModel.load(id, UserData);
+  }
+  static async ReactionData(id:string) : Promise<ReactionData> {
+    return BaseDataModel.load(id, ReactionData);
   }
   static async ChannelData(id:string) : Promise<ChannelData> {
     return BaseDataModel.load(id, ChannelData);
