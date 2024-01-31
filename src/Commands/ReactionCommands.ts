@@ -12,6 +12,7 @@ import { UserData } from "../DataModels/mod";
 import { reactionImages, reactionDefaults } from "../Data/ReactionImages";
 
 export class ReactionCommand extends Command {
+  name="ReactionCommand"
   constructor() {
     super();
 
@@ -23,6 +24,7 @@ export class ReactionCommand extends Command {
     // Check different reaction states (like kiss, hug, cuddle, etc.)
     // Return true if the reaction is contained in a list of reaction strings
     // Else return false
+    console.log("CheckIf reaction");
     
     let [command, ...args] = msg.content.slice(prefix.length).trim().split(/ +/);
     let reaction = command;
@@ -33,6 +35,7 @@ export class ReactionCommand extends Command {
       // Else return false
       let reactionImage = reactionImages.find((image) => image.reaction === reaction);
       if (reactionImage !== undefined) {
+        console.log("Matched reaction");
         return true;
       }
     }

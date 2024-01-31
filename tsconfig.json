@@ -13,7 +13,6 @@
       "noEmit": false,
       "checkJs": false,
       "outDir": "./dist",
-      
   },
   "include": ["src/App.ts", "./src/Test.ts" ],
   "exclude": [

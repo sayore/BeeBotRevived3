@@ -2,7 +2,7 @@ import { DataModelType } from "../Enum";
 import { BaseDataModel } from "./BaseDataModel";
 
 export class ChannelData extends BaseDataModel {
-  myType = DataModelType.User;
+  myType = DataModelType.Channel;
   data: {
     count: number;
   };

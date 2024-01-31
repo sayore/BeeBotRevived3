@@ -4,7 +4,7 @@ import level from 'level-ts';
 import { LogLevel, Logging } from 'supernode/Base/Logging';
 import { BaseDataModel, ChannelData, Load, UserData } from './DataModels/mod';
 import { Command, CommandCollection, CommandHandler } from './Structures/mod';
-import { ReactionCommand } from './Commands/mod';
+import { ReactionCommand, RedirectCommand } from './Commands/mod';
 import { getClient, setClient } from "./Globals";
 
 import { Client, GatewayIntentBits , Message, REST, Routes } from 'discord.js';
@@ -68,10 +68,6 @@ cmd().then(async () => {
     // Check if the message starts with the prefix
     if (message.content.startsWith(prefix)) {
       // Extract the command and arguments from the message 
-
-
-      
-
       // Simple ping-pong command
       if (command === 'ping') {
         var all = await Load.AllData(message);
@@ -85,6 +81,7 @@ cmd().then(async () => {
 
     let commandCollection : CommandCollection = new CommandCollection();
     commandCollection.add(new ReactionCommand());
+    commandCollection.add(new RedirectCommand());
     
     // Use CommandHandler to check if the command should be executed
     CommandHandler.handle(commandCollection, message);

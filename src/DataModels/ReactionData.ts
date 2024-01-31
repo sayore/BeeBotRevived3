@@ -1,5 +1,6 @@
 import { DataModelType } from "../Enum";
-import { BaseDataModel } from "./BaseDataModel";
+import { db } from "../Globals";
+import { BaseDataModel, CustomHash } from "./BaseDataModel";
 import { CreateKey } from "./CreateKey";
 import crypto from "crypto";
 
@@ -19,19 +20,18 @@ export class ReactionData extends BaseDataModel {
   public static async addOrUpdate(reaction: string, template: string | string[],templateSingle:string | string[] | undefined,templateMulti:string | string[] | undefined, special: any, link: string): Promise<void> {
     // Check if the reaction already exists
     const id = CreateKey.ReactionHash({link:link[0], reaction});
-    let reactionData = await this.get(id, ReactionData);
-    if (!reactionData) {
+    let reactionData : any = {};
+    if (!await db.exists(id)) {
       // Create a new reaction
       reactionData = new ReactionData(id, reaction, {template, special, link});
+      await reactionData.save();
     } else {
       // Update the reaction
-      reactionData.data.reaction = reaction;
-      reactionData.data.template = template;
-      reactionData.data.special = special;
-      reactionData.data.link = link;
+      reactionData.reaction = reaction;
+      reactionData.template = template;
+      reactionData.special = special;
+      reactionData.link = link;
     }
-    // Save the reaction
-    await reactionData.save();
   }
 
   // Create a hash from the link and reaction field, to check if the reaction already exists
@@ -46,5 +46,9 @@ export class ReactionData extends BaseDataModel {
     const hash = crypto.createHash("sha256");
     hash.update(data.link + data.reaction);
     return hash.digest("hex");
+  }
+
+  public usesCustomHash(): boolean {
+    return true;
   }
 }
