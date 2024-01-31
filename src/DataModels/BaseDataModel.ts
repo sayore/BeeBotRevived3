@@ -68,7 +68,7 @@ export class BaseDataModel {
         var key;
 
         key = obj.hash();
-        Logging.log("Loading "+key, LogLevel.Report);
+        //Logging.log("Loading "+key, LogLevel.Report);
         
         try {
             //console.log("Loading "+key);

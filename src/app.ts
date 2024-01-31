@@ -1,14 +1,11 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import level from 'level-ts';
-import { LogLevel, Logging } from 'supernode/Base/Logging';
-import { BaseDataModel, ChannelData, Load, UserData } from './DataModels/mod';
-import { Command, CommandCollection, CommandHandler } from './Structures/mod';
+import { Logging } from 'supernode/Base/Logging';
+import { Load } from './DataModels/mod';
 import { ReactionCommand, RedirectCommand } from './Commands/mod';
-import { getClient, setClient } from "./Globals";
+import { commands, getClient, setClient } from "./Globals";
 
 import { Client, GatewayIntentBits , Message, REST, Routes } from 'discord.js';
-import { DataModelType } from './Enum';
 
 import {db,prefix} from "./Globals";
 
@@ -45,16 +42,15 @@ cmd().then(async () => {
   // Create a new Discord client with necessary intents
   setClient(new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] }));
   let client = getClient();
-  //const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-
-  // Your bot token. Replace 'YOUR_BOT_TOKEN' with your actual bot token
-  const token = process.env.TOKEN;
-
-  // The prefix for your bot's commands
 
   // Ready event - When the bot is ready and logged in
   client.once('ready', () => {
     console.log(`Logged in as ${client.user?.tag}`);
+
+    commands.add(new ReactionCommand());
+    commands.add(new RedirectCommand());
+    commands.init();
+    commands.selftest();
   });
 
   // Message event - Triggered whenever a message is sent in any channel the bot has access to
@@ -79,12 +75,10 @@ cmd().then(async () => {
       }
     }
 
-    let commandCollection : CommandCollection = new CommandCollection();
-    commandCollection.add(new ReactionCommand());
-    commandCollection.add(new RedirectCommand());
+    
     
     // Use CommandHandler to check if the command should be executed
-    CommandHandler.handle(commandCollection, message);
+    commands.execute(message);
   });
   client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;

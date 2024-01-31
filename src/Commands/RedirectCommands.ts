@@ -1,20 +1,44 @@
-import { Guild, TextChannel, MessageReaction, User, Message } from 'discord.js';
+import { EmbedBuilder, Message } from 'discord.js';
 import { Command } from '../Structures/Command';
 import { prefix } from '../Globals';
 import { Load } from '../DataModels/mod';
 import { RedirectError } from '../Structures/Error';
+import { Logging } from 'supernode/Base/mod';
 
 export class RedirectCommand extends Command {
   name="RedirectCommand"
   constructor() {
     super();
   }
-  public async triggerfunc(msg: Message<boolean>): Promise<boolean|undefined> {
+  public onSelftest(silent: boolean): Promise<void> {
+    Logging.log("Selftest: "+this.name,"INFO");
+
+    return;
+  }
+
+  public async trigger(msg: Message<boolean>): Promise<boolean|undefined> {
     // Check different reaction states (like kiss, hug, cuddle, etc.)
     // Return true if the reaction is contained in a list of reaction strings
     // Else return false
-    
     let [command, ...args] = msg.content.slice(prefix.length).trim().split(/ +/);
+
+    let guild = await Load.GuildData(msg.guild.id);
+    if(guild.data.redirects.has(msg.channel.id)) {
+      let redirect = guild.data.redirects.get(msg.channel.id);
+      
+      let targetChannel = msg.guild.channels.cache.get(redirect.to);
+      if(targetChannel.isTextBased()) {
+        let messageContent = msg.content;
+        
+        var createdEmbed = new EmbedBuilder()
+          .setColor('#FFD35D')
+          .setDescription(messageContent)
+          .setAuthor({name:msg.author.username, iconURL:msg.author.avatarURL(), url:msg.author.avatarURL()})
+        await targetChannel.send({embeds:[createdEmbed]});
+        await msg.delete();
+      }
+    }
+
     //console.log("A1")
     if(command != "redirect") return false;
     //console.log("B1")
@@ -25,7 +49,7 @@ export class RedirectCommand extends Command {
 
     return true;
   }
-  async cmd(msg: Message<boolean>): Promise<boolean | void> {
+  async execute(msg: Message<boolean>): Promise<boolean | void> {
     let [command, ...args] = msg.content.slice(prefix.length).trim().split(/ +/);
     //console.log(command + " " + args[0])
     var data = await Load.AllData(msg);

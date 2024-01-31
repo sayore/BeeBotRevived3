@@ -27,9 +27,11 @@ export class Command implements ICommand {
   messagecontent?:string
   always?:boolean
   triggerwords?:string[]
-  public async triggerfunc(msg:Message) : Promise<boolean|undefined> { return undefined; }
+  public async onInit(silent:boolean) : Promise<void> {}
+  public async onSelftest(silent:boolean) : Promise<void> {}
   typeofcmd?:TypeOfCmd
-  public async cmd(msg: Message) : Promise<void|boolean> { Logging.log("Command cmd not overridden but cmd executed. ("+this.name+")"); return false; }
+  public async trigger(msg:Message) : Promise<boolean|undefined> { return undefined; }
+  public async execute(msg: Message) : Promise<void|boolean> { Logging.log("Command cmd not overridden but cmd executed. ("+this.name+")"); return false; }
   isHalting?:boolean
   canHalt?:boolean
 }
@@ -42,7 +44,7 @@ export interface ICommand {
   messagecontent?:string
   always?:boolean
   triggerwords?:string[]
-  triggerfunc?:(msg:Message) => Promise<boolean>;
+  trigger?:(msg:Message) => Promise<boolean>;
   typeofcmd?:TypeOfCmd
   isHalting?:boolean
   canHalt?:boolean

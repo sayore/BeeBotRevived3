@@ -2,25 +2,27 @@ import { Message } from "discord.js";
 import { Command } from "../Structures/Command";
 import { EmbedBuilder } from 'discord.js';
 import { prefix } from "../Globals";
-import { ReactionData } from "../DataModels/ReactionData";
 import { template } from "lodash";
-import { RandomUtils } from "../Utility/AnyHelper";
 import { getMentions } from "../Utility/MessageHelper";
 import _ from "lodash";
 import { Load } from "../DataModels/Load";
 import { UserData } from "../DataModels/mod";
 import { reactionImages, reactionDefaults } from "../Data/ReactionImages";
+import { Logging } from "supernode/Base/mod";
 
 export class ReactionCommand extends Command {
   name="ReactionCommand"
-  constructor() {
-    super();
+  
+  public onSelftest(silent: boolean): Promise<void> {
+      Logging.log("Selftest: "+this.name,"INFO");
+      Logging.log(`Found ${reactionDefaults.length} reactions`,"INFO");
+      Logging.log(`Reactions: ${reactionDefaults.map(v=>v.reaction).join(", ")}`,"INFO");
+      Logging.log(`Found ${reactionImages.length} reaction images`,"INFO");
 
-    reactionImages.forEach((image) => {
-      ReactionData.addOrUpdate(image.reaction, image?.template, image?.templateSingle, image?.templateMulti, {}, image.link)
-    });
+      return;
   }
-  public async triggerfunc(msg: Message<boolean>): Promise<boolean|undefined> {
+
+  public async trigger(msg: Message<boolean>): Promise<boolean|undefined> {
     // Check different reaction states (like kiss, hug, cuddle, etc.)
     // Return true if the reaction is contained in a list of reaction strings
     // Else return false
@@ -35,13 +37,13 @@ export class ReactionCommand extends Command {
       // Else return false
       let reactionImage = reactionImages.find((image) => image.reaction === reaction);
       if (reactionImage !== undefined) {
-        console.log("Matched reaction");
         return true;
       }
     }
     return false;
   }
-  async cmd(msg: Message<boolean>): Promise<boolean | void> {
+
+  async execute(msg: Message<boolean>): Promise<boolean | void> {
     let [command, ...args] = msg.content.slice(prefix.length).trim().split(/ +/);
     try {
       let mentions = getMentions(msg.content);
@@ -112,8 +114,7 @@ export class ReactionCommand extends Command {
       } else {
         throw new Error("No template found for this reaction");
       }
-      console.log(selectedReactionTemplate)
-      console.log(selectedReactionTemplateString)
+      
       // Create embed with image
       // - Create embed
       // - Set image
