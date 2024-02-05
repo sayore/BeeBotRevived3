@@ -57,5 +57,9 @@ export class UserData extends BaseDataModel {
       });
     });
   }
+
+  public async addRole(role: string, throwIfRoleOwned: boolean = false) {
+    
+  }
 }
 

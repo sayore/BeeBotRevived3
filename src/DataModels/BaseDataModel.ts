@@ -68,24 +68,20 @@ export class BaseDataModel {
         var key;
 
         key = obj.hash();
-        //Logging.log("Loading "+key, LogLevel.Report);
         
         try {
-            //console.log("Loading "+key);
             if(await db.exists(key)){
                 var result = await db.get(key);
                 if(typeof result === "object") data = result;
                 else { data = JSON.parse(await db.get(key), this.reviver); }
                 //console.log("Loaded "+JSON.stringify(data)+" from "+key);
-            }else
-                //console.log("Not found "+key);
-            if(typeof data === "undefined") {
+            } else if(typeof data === "undefined") {
                 Logging.log(key + " not found (Created now)", LogLevel.Report);
                 data = {created:Date.now(),lastAccessed:Date.now()};
             }
             data.lastAccessed = Date.now();
         } catch (err) {
-            //console.log(err);
+            console.log(err);
         }
 
         (obj as T).preLoad();

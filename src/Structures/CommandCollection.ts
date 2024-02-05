@@ -1,9 +1,11 @@
-import { Message } from "discord.js";
+import { CacheType, Interaction, Message, MessageReaction, PartialMessageReaction, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import { Command, ICommand } from "./Command";
 import { Logging } from "supernode/Base/Logging";
+import { Load } from "../DataModels/Load";
 
 // Collection of Commands to be used by the bot
 export class CommandCollection {
+  
   items : Map<string, Command> = new Map(); //new Map<string, typeof
 
   init() {
@@ -81,5 +83,70 @@ export class CommandCollection {
     }
 
     Logging.log(`Executed ${statistics.executed} commands, ${statistics.failed} failed, ${statistics.checked} checked`, "INFO");
+  }
+
+  /** Executes function elevated and only with our Data, 
+   * data needs to be fetched from Discord, primarily used for reaction/interaction-space. */
+  async executeLite(args: string[]) {
+    // Initialize statistics, like executed, failed
+    let statistics = {
+      executed: 0,
+      failed: 0,
+      checked: 0
+    };
+
+    // Loop over all commands
+    for (const cmd of this.items.values()) {
+      // Execute the command, and if it returns true, break out of the loop
+      let result = await cmd.onLite(args);
+      //console.log("Executed... ")
+      if (result) {
+        statistics.executed++;
+        if(cmd.isHalting) break;
+      } else {
+        statistics.failed++;
+      }
+    }
+    Logging.log(`Lited ${statistics.executed} commands, ${statistics.failed} failed, ${statistics.checked} checked`, "INFO");
+  }
+
+  async onRegisterSlashCommand() : Promise<RESTPostAPIChatInputApplicationCommandsJSONBody[]> {
+    let slashCommands = [];
+    this.items.forEach(async (cmd, name) => {
+      let returns = await cmd.onRegisterSlashCommands();
+      if(returns != undefined) {
+        if(Array.isArray(returns)) {
+          slashCommands.push(...returns);
+        } else {
+          slashCommands.push(returns);
+        }
+      }
+    });
+    return slashCommands;
+  }
+
+  public async reaction(reaction: MessageReaction | PartialMessageReaction) {
+    this.items.forEach((cmd, name) => {
+      cmd.onReaction(reaction);
+    });
+  }
+
+  public async interaction(interaction: Interaction<CacheType>) {
+    let statistics = {
+      executed: 0,
+      failed: 0,
+      checked: 0
+    };
+    this.items.forEach(async (cmd) => {
+      let ret = false;
+      try {
+        let ret = await cmd.onInteraction(interaction);
+      } catch (error) {
+        Logging.log("Error in interaction: "+error, "ERROR");
+        statistics.failed++;
+      }
+      if(ret) statistics.executed++;
+      statistics.checked++;
+    });
   }
 }

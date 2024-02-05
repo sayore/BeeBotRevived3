@@ -2,10 +2,10 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { Logging } from 'supernode/Base/Logging';
 import { Load } from './DataModels/mod';
-import { ReactionCommand, RedirectCommand } from './Commands/mod';
+import { GuildCommand, ReactionCommand, RedirectCommand } from './Commands/mod';
 import { commands, getClient, setClient } from "./Globals";
 
-import { Client, GatewayIntentBits , Message, REST, Routes } from 'discord.js';
+import { Client, GatewayIntentBits , Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 
 import {db,prefix} from "./Globals";
 
@@ -18,19 +18,22 @@ var hasRun = true;
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 let cmd = async () => {
-  const commands = [
-    {
-      name: 'ping',
-      description: 'Replies with Pong!',
-    },
-  ];
+  commands.add(new ReactionCommand());
+  commands.add(new RedirectCommand());
+  commands.add(new GuildCommand());
+
+  let slashCommands = [];
+
+  let slashCommandsCollected = await commands.onRegisterSlashCommand()
+  console.log(slashCommandsCollected.length)
+  if(slashCommandsCollected.length > 0) slashCommands.push(...slashCommandsCollected);
 
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands("900320090732527638"), { body: commands });
+    await rest.put(Routes.applicationCommands("900320090732527638"), { body: slashCommands });
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
@@ -47,8 +50,6 @@ cmd().then(async () => {
   client.once('ready', () => {
     console.log(`Logged in as ${client.user?.tag}`);
 
-    commands.add(new ReactionCommand());
-    commands.add(new RedirectCommand());
     commands.init();
     commands.selftest();
   });
@@ -61,31 +62,14 @@ cmd().then(async () => {
     const [command, ...args] = message.content.slice(prefix.length).trim().split(/ +/);
     Logging.log( `Message: ${message.content}`,"INFO");
     Logging.log( `Command: ${command}, Args: ${args}`,"INFO");
-    // Check if the message starts with the prefix
-    if (message.content.startsWith(prefix)) {
-      // Extract the command and arguments from the message 
-      // Simple ping-pong command
-      if (command === 'ping') {
-        var all = await Load.AllData(message);
-        all.user.data.count = 0 || all.user.data.count+1;
-        all.channel.data.count = 0 || all.channel.data.count+1;
-        await all.saveAll();
-        message.reply('Pong! U ' + JSON.stringify(all.user.data));
-        message.reply('Pong! C ' + JSON.stringify(all.channel.data));
-      }
-    }
-
     
-    
-    // Use CommandHandler to check if the command should be executed
     commands.execute(message);
   });
+
   client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
   
-    if (interaction.commandName === 'ping') {
-      await interaction.reply('Pong!');
-    }
+    await commands.interaction(interaction);
   });
 
   // Log in to Discord with your bot token
