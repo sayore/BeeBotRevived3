@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "tsc-watch --onSuccess \"ts-node ./src/App.ts\""
+  },
   "dependencies": {
     "@types/lodash": "^4.14.196",
     "@types/node": "^20.4.5",

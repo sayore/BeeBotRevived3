@@ -55,21 +55,21 @@ export class CommandCollection {
         // Check if the user is in the list of allowed groups
         if (!msg.member?.roles.cache.some(r => cmd.grouplimitedids?.includes(r.id))) continue;
       }
-      
+
       //console.log("B... ")
       // Check if triggerwords are set and if the message contains all of them
       if (!cmd.triggerwords || cmd.triggerwords.length > 0) {
         // Check if the message contains all triggerwords
         if (!cmd.triggerwords.every(w => msg.content.includes(w))) continue;
       }
-      
+
       //console.log("C... ")
       // Check if triggerfunc is set and if it returns true, continue if it does
       if (!cmd.trigger || await cmd.trigger(msg) === false) {
         statistics.checked++;
         continue;
       }
-      
+
       //console.log("D... ")
       // Execute the command, and if it returns true, break out of the loop
       let result = await cmd.execute(msg);

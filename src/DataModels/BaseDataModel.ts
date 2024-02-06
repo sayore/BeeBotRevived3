@@ -68,7 +68,7 @@ export class BaseDataModel {
         var key;
 
         key = obj.hash();
-        
+
         try {
             if(await db.exists(key)){
                 var result = await db.get(key);
@@ -87,7 +87,7 @@ export class BaseDataModel {
         (obj as T).preLoad();
         obj.data = data;
         (obj as T).afterLoad();
-        
+
         return obj as T;
     }
 

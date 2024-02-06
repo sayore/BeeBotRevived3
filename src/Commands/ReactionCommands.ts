@@ -52,9 +52,11 @@ export class ReactionCommand extends Command {
 
       //mentioned user/s should get their respective Data Loaded
       if (mentions.length > 0) {
-        await Promise.all(mentions.map(async (mention) => {
-          mentionsUserData.push(await Load.UserData(mention));
-        }));
+        await Promise.all(
+          mentions.map(async (mention) => {
+            mentionsUserData.push(await Load.UserData(mention));
+          })
+        );
       }
 
       // Grab random image from reactionImages matching the reaction requested
@@ -138,7 +140,6 @@ export class ReactionCommand extends Command {
           .setTitle(reactionImage.reaction.slice(0, 1).toUpperCase() + reactionImage.reaction.slice(1) + " " + selectedReactionTemplateString)
         await sendEmbed.edit({ embeds : [createdEmbed] });
       }, 30000);
-
 
       return true;
     } catch (error) {
