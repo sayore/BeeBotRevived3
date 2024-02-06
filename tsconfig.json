@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-      "module": "nodenext", 
-      "target": "es6",
-      "moduleResolution": "NodeNext",
+      "module": "node16", 
+      "target": "es2021",
+      "moduleResolution": "node16",
       "lib": [
-          "es6",
-          "dom"
+          "es2021"
       ],
       "sourceMap": true,
       "declaration": true,
