@@ -34,15 +34,18 @@ export class RedirectCommand extends Command {
           .setColor('#FFD35D')
           .setDescription(messageContent)
           .setAuthor({name:msg.author.username, iconURL:msg.author.avatarURL(), url:msg.author.avatarURL()})
-        await targetChannel.send({embeds:[createdEmbed]});
-        await msg.delete();
+        Promise.all([
+          targetChannel.send({embeds:[createdEmbed]}), 
+          msg.delete(),
+          async ()=>{redirect.reply ?? msg.channel.send(redirect.reply ?? "")}
+        ]);
       }
     }
 
     //console.log("A1")
     if(command != "redirect") return false;
     //console.log("B1")
-    let options = ["add", "remove", "list", "help"];
+    let options = ["add", "remove", "list", "changereply", "help"];
     //console.log("D1")
     if(!options.includes(args[0].toLowerCase())) return false;
     //console.log("E1")
