@@ -381,3 +381,4 @@ dist/**/*.d.ts
 ./dist/**/*
 dist
 .env
+.vscode/tasks.json
